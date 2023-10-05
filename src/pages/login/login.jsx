@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as yup from "yup";
 import KErrorMessage from "../../components/common/KErrorMessage";
 import logo from "../../assets/logo.svg";
 import map from "../../assets/map.png";
-
-
-
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../content/usercontext";
 
 const validationSchema = yup.object({
   email: yup.string().required("Email is Required"),
@@ -16,10 +16,13 @@ const validationSchema = yup.object({
       /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
       "Must Contain 8 Characters,One Uppercase,One LowerCase,One Number and One special case character"
     ),
-    
 });
 
 export const Login = () => {
+  const dir = useNavigate();
+
+  const { login } = useContext(UserContext);
+
   return (
     <div className="container h-screen flex justify-between items-center bg-slate-100 rounded-xl">
       <div className="flex flex-grow justify-center">
@@ -40,6 +43,18 @@ export const Login = () => {
               password: "",
             }}
             onSubmit={(values) => {
+              axios
+                .post("http://localhost:9000/api/v1/auth/login", {
+                  email: values.email,
+                  password: values.password,
+                })
+                .then((response) => {
+                  login(response.data.data);
+                })
+                .catch((error) => {
+                  alert("something went wrong");
+                  console.log(error);
+                });
               console.log(values);
             }}
           >
@@ -68,7 +83,10 @@ export const Login = () => {
                 <KErrorMessage name="password" />
               </div>
 
-              <button className="border mt-3 bg-[#1a96fc]  text-white p-1 rounded-lg py-2 text-xs w-72 font-medium">
+              <button
+                className="border mt-3 bg-[#1a96fc]  text-white p-1 rounded-lg py-2 text-xs w-72 font-medium"
+                type="submit"
+              >
                 Login
               </button>
             </Form>
